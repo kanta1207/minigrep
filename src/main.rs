@@ -5,14 +5,13 @@ use std::io::prelude::*;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let query = &args[1];
-    let file_path = &args[2];
+    let config = Config::new(&args);
 
-    println!("Searching for {} in {}", query, file_path);
+    println!("Searching for {} in {}", config.query, config.filename);
 
-    println!("In file {}", file_path);
+    println!("In file {}", config.filename);
 
-    let mut f = File::open(file_path).expect("ファイルが開けませんでした");
+    let mut f = File::open(config.filename).expect("ファイルが開けませんでした");
 
     let mut contents = String::new();
     f.read_to_string(&mut contents).expect("ファイルが読み込めませんでした");
@@ -20,3 +19,16 @@ fn main() {
     println!("File contents: {}", contents);
 }
 
+struct Config {
+    query: String,
+    filename: String,
+}
+
+impl Config {
+    fn new(args: &[String]) -> Config {
+        let query = args[1].clone();
+        let filename = args[2].clone();
+
+        Config { query, filename }
+    }
+}
