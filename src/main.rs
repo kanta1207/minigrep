@@ -4,9 +4,7 @@ use std::process;
 
 
 fn main() {
-    let args = minigrep::get_args();
-
-    let config = minigrep::generate_config(&args); 
+    let config = minigrep::generate_config(); 
 
     
     if let Err(e) = minigrep::run(config) {

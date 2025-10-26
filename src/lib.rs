@@ -3,11 +3,7 @@ use std::io::prelude::*;
 use std::process;
 use std::error::Error;
 use std::env;
-
-pub fn get_args() -> Vec<String> {
-    let args: Vec<String> = env::args().collect();
-    args
-}
+ 
 
 pub struct Config {
     pub query: String,
@@ -16,12 +12,18 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-         return Err("not enough arguments");
-        }
-        let query = args[1].clone();
-        let filename = args[2].clone();
+    pub fn new(mut args: std::env::Args) -> Result<Config, &'static str> {
+        args.next();
+
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+
+        let filename = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a filename"),
+        };
 
         let case_sensitive = env::var("CASE_INSENSITIVE").is_err();
 
@@ -40,22 +42,15 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn generate_config(args: &[String]) -> Config {
-    Config::new(&args).unwrap_or_else(|err| {
+pub fn generate_config() -> Config {
+    Config::new(env::args()).unwrap_or_else(|err| {
         println!("Problem parsing arguments: {}", err);
         process::exit(1);
     })
 }
 
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
-    let mut results = Vec::new();
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
-    println!("search results: {:?}", results);
-    results
+    contents.lines().filter(|line| line.contains(query)).collect()
 }
 
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
